@@ -1,13 +1,14 @@
 # Get all the relevant words from the doc
 def gatherWords():
     
-    filepath = 'cacm.tar\cacm.all'
+    filepath = '..\cacm.tar\cacm.all'
     with open(filepath, 'r') as fp:
         line = fp.readline()
         cnt = 1
         while line and cnt < 25:
             if ".I" in line:
-                newDoc = open("doc1.txt", "w+")
+                docName = "doc{}.txt".format(cnt)
+                newDoc = open(docName, "w+")
                 newDoc.write(line)
                 line = fp.readline()
                 cnt += 1
@@ -17,6 +18,9 @@ def gatherWords():
                 cnt += 1
  
 def checkIndex():
-    print()
+    for i in range(10):
+        print()
 
-gatherWords()
+# gatherWords()
+
+checkIndex()
