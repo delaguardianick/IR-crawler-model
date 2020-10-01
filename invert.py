@@ -1,26 +1,56 @@
 # Get all the relevant words from the doc
+
+
+
 def gatherWords():
     
     filepath = '..\cacm.tar\cacm.all'
     with open(filepath, 'r') as fp:
         line = fp.readline()
         cnt = 1
-        while line and cnt < 25:
+        docID = 1
+        while line and cnt < 400:
+            # Index
             if ".I" in line:
-                docName = "doc{}.txt".format(cnt)
+                docName = "..\local\doc{}.txt".format(docID)
                 newDoc = open(docName, "w+")
-                newDoc.write(line)
-                line = fp.readline()
-                cnt += 1
-            else: 
-                newDoc.write(line)
-                line = fp.readline()
-                cnt += 1
- 
-def checkIndex():
-    for i in range(10):
-        print()
+                print(docID)
+                docID += 1
 
-# gatherWords()
+            # Title
+            if ".T" in line:
+                title = fp.readline()
+                print(title.strip())
 
-checkIndex()
+            # Abstract
+            if ".W" in line:
+                abstract = ""
+                line = fp.readline()
+                while(".B" not in line):
+                    abstract += line.strip() + "\n"
+                    line = fp.readline()
+                print(abstract)
+
+            # Publication Date
+            if ".B" in line:
+                line = fp.readline()
+                date = line[5:]
+                print(date.strip())
+
+            newDoc.write(line)
+            line = fp.readline()
+            cnt += 1
+
+mainDict =  {}
+def addtoDict(term, docID):
+    None
+
+
+def preProcessing():
+    s = "CACM December, 1958"
+    date = s[5:]
+    print(date)
+
+gatherWords()
+
+# preProcessing()
