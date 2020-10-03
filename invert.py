@@ -7,7 +7,7 @@ def gatherWords():
         cnt = 1
         docID = 0
         pos = 1
-        while line:
+        while line and cnt < 1000:
             # Index
             if ".I" in line:
                 # docName = "..\local\doc{}.txt".format(docID)
@@ -60,23 +60,22 @@ def addtoPostings(term, docID, pos):
         # postings[term][0] = postings[term][0] + 1
             
         # Check if the term has existed in that DocID before. 
-        if docID in postings[term][1]: 
-            postings[term][1][docID].append(pos) 
+        if docID in postings[term][0]: 
+            postings[term][0][docID].append(pos) 
+            postings[term][0][docID][0] = postings[term][0][docID][0] + 1
                 
         else: 
-            postings[term][1][docID] = [pos] 
+            postings[term][0][docID] = [1, pos] 
 
     # If term does not exist in the positional index dictionary  
     # (first encounter). 
     else: 
         # Initialize the list. 
         postings[term] = [] 
-        # The total frequency is 1. 
-        postings[term].append(None) 
         # The postings list is initially empty. 
         postings[term].append({})       
-        # Add doc ID to postings list. 
-        postings[term][1][docID] = [pos] 
+        # Add doc ID and position to postings list. 
+        postings[term][0][docID] = [1, pos] 
 
 
 def addtoDict(term):
@@ -86,10 +85,13 @@ def addtoDict(term):
         mainDict[term] = 1
 
 def preProcessing():
-    s = "CACM December, 1958"
-    s = s.split()
-    for i in s:
-        print(i)
+    testDict = {}
+    testDict["hello"] = []
+    testDict["hello"].append({})
+    testDict["hello"][0][2] = 30
+    # testDict["hello"].append(30)
+    # testDict["hello"][1].append(30)
+    print(testDict)
 
 gatherWords()
 # print(mainDict)
