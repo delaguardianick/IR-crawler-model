@@ -1,10 +1,22 @@
-# Get all the relevant words from the doc
+import time
+import string
+from nltk.stem.porter import PorterStemmer
 
-def invert(filepath):
+start_time = time.time()
+
+# Get all the relevant words from the doc
+useStopWords = False
+useStemming = False
+def invert(filepath, stop, stem):
+    global useStopWords
+    global useStemming
+    useStopWords = stop
+    useStemming = stem
+    # print(useStemming)
     generateLists(filepath)
-    printDict(mainDict)
-    print("\n")
-    print(postings)
+    exportDict(mainDict)
+    exportPostings(postings)
+    print("--- %s seconds ---" % (time.time() - start_time))
 
 
 def generateLists(filepath):
@@ -13,7 +25,7 @@ def generateLists(filepath):
         cnt = 1
         docID = 0
         pos = 1
-        while line and cnt < 1000:
+        while line:
             # Index
             if ".I" in line:
                 docID += 1
@@ -51,10 +63,47 @@ postings = {}
 def tokenize(string, docID, pos):
     tokens = string.split()
     for token in tokens:
+        token = preProcess(token)
+        # pass if null
+        if token == None:
+            pass
         addtoDict(token)
         addtoPostings(token, docID, pos)
         pos += 1
     return pos
+
+# Cleans the string - removes punctuation, whitespace etc
+# Calls useStemming and stopword functions if True
+def preProcess(token):
+    foundStopWord = False
+    token = token.strip()
+    token = token.lower()
+    table = str.maketrans('', '', string.punctuation)
+    token = token.translate(table)
+    if useStopWords:
+        token = filterStopWord(token) 
+        if token == None:
+            foundStopWord = True
+    if useStemming and not foundStopWord:
+        token = stemWord(token)
+    if not foundStopWord:
+        return token
+
+# NoneType error
+def filterStopWord(token):
+    filepath =  "../cacm.tar/common_words"
+    with open(filepath, 'r') as fp:
+        stop_words = fp.read()
+    if token in stop_words:
+        return None
+    else: 
+        return token
+
+# Stemms the term
+def stemWord(token):
+    porter = PorterStemmer()
+    stemmed = porter.stem(token)
+    return stemmed
 
 def addtoPostings(term, docID, pos):
     if term in postings:             
@@ -86,19 +135,18 @@ def addtoDict(term):
     else:
         mainDict[term] = 1
 
-# def preProcessing():
-#     testDict = {}
-#     testDict["hello"] = []
-#     testDict["hello"].append({})
-#     testDict["hello"][0][2] = 30
-#     # testDict["hello"].append(30)
-#     # testDict["hello"][1].append(30)
-#     print(testDict)
+def exportDict(mainDict):
+    docName = "..\output\dictionary.txt"
+    newDoc = open(docName, "w+")	               
+    # mainDict = (x for x in mainDict if x is not None)
+    for key in sorted(mainDict):
+        newDoc.write("%s: %s" % (key, mainDict[key]) + "\n")
 
+def exportPostings(postings):
+    docName = "..\output\postings.txt"
+    newDoc = open(docName, "w+")
 
-def printDict(mainDict):
-    sortedDict = sorted(mainDict)
-    print (sortedDict)
+    for key in sorted(postings):
+        newDoc.write("%s: %s" % (key, postings[key]) + "\n")
 
-invert('..\cacm.tar\cacm.all')
-# preProcessing()
+invert('..\cacm.tar\cacm.all', False, False)
