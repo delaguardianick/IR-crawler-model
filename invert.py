@@ -1,7 +1,13 @@
 # Get all the relevant words from the doc
 
-def gatherWords():
-    filepath = '..\cacm.tar\cacm.all'
+def invert(filepath):
+    generateLists(filepath)
+    printDict(mainDict)
+    print("\n")
+    print(postings)
+
+
+def generateLists(filepath):
     with open(filepath, 'r') as fp:
         line = fp.readline()
         cnt = 1
@@ -10,9 +16,6 @@ def gatherWords():
         while line and cnt < 1000:
             # Index
             if ".I" in line:
-                # docName = "..\local\doc{}.txt".format(docID)
-                # newDoc = open(docName, "w+")
-                # print(docID)
                 docID += 1
                 pos = 1
 
@@ -54,17 +57,16 @@ def tokenize(string, docID, pos):
     return pos
 
 def addtoPostings(term, docID, pos):
-    if term in postings: 
-                          
-        # Increment total freq by 1. 
-        # postings[term][0] = postings[term][0] + 1
+    if term in postings:             
             
         # Check if the term has existed in that DocID before. 
         if docID in postings[term][0]: 
             postings[term][0][docID].append(pos) 
+            # increment termFreq every time term appears in same doc
             postings[term][0][docID][0] = postings[term][0][docID][0] + 1
                 
         else: 
+            # add the position to the doc
             postings[term][0][docID] = [1, pos] 
 
     # If term does not exist in the positional index dictionary  
@@ -74,7 +76,7 @@ def addtoPostings(term, docID, pos):
         postings[term] = [] 
         # The postings list is initially empty. 
         postings[term].append({})       
-        # Add doc ID and position to postings list. 
+        # Add doc ID, termFreq, and position to the postings list 
         postings[term][0][docID] = [1, pos] 
 
 
@@ -84,18 +86,19 @@ def addtoDict(term):
     else:
         mainDict[term] = 1
 
-def preProcessing():
-    testDict = {}
-    testDict["hello"] = []
-    testDict["hello"].append({})
-    testDict["hello"][0][2] = 30
-    # testDict["hello"].append(30)
-    # testDict["hello"][1].append(30)
-    print(testDict)
+# def preProcessing():
+#     testDict = {}
+#     testDict["hello"] = []
+#     testDict["hello"].append({})
+#     testDict["hello"][0][2] = 30
+#     # testDict["hello"].append(30)
+#     # testDict["hello"][1].append(30)
+#     print(testDict)
 
-gatherWords()
-# print(mainDict)
-print("\n")
-print(postings)
 
+def printDict(mainDict):
+    sortedDict = sorted(mainDict)
+    print (sortedDict)
+
+invert('..\cacm.tar\cacm.all')
 # preProcessing()
