@@ -3,22 +3,23 @@ import string
 from nltk.stem.porter import PorterStemmer
 
 start_time = time.time()
-
-# Get all the relevant words from the doc
+mainDict =  {}
+postings = {}
 useStopWords = False
 useStemming = False
+
+# Driver function
 def invert(filepath, stop, stem):
     global useStopWords
     global useStemming
     useStopWords = stop
     useStemming = stem
-    # print(useStemming)
     generateLists(filepath)
     exportDict(mainDict)
     exportPostings(postings)
     print("--- %s seconds ---" % (time.time() - start_time))
 
-
+# Get all the relevant lines from the doc and calls tokenize on them
 def generateLists(filepath):
     with open(filepath, 'r') as fp:
         line = fp.readline()
@@ -53,13 +54,11 @@ def generateLists(filepath):
                 date = line[5:]
                 pos = tokenize(date, docID, pos)
 
-            # newDoc.write(line)
             line = fp.readline()
             cnt += 1
 
-mainDict =  {}
-postings = {}
-
+# Splits lines into tokens, calls preProcess on each token and adds them 
+# to the dictionary and postings list
 def tokenize(string, docID, pos):
     tokens = string.split()
     for token in tokens:
@@ -80,16 +79,22 @@ def preProcess(token):
     token = token.lower()
     table = str.maketrans('', '', string.punctuation)
     token = token.translate(table)
+    # if useStopWords is True, call function
     if useStopWords:
         token = filterStopWord(token) 
         if token == None:
             foundStopWord = True
+    
+    # If useStemming is True and token is not a stop work, stem the word
     if useStemming and not foundStopWord:
         token = stemWord(token)
+    
+    # If the token is not a stop word, return the token to be added to lists
     if not foundStopWord:
         return token
 
 # NoneType error
+# Not working currently
 def filterStopWord(token):
     filepath =  "../cacm.tar/common_words"
     with open(filepath, 'r') as fp:
@@ -99,21 +104,20 @@ def filterStopWord(token):
     else: 
         return token
 
-# Stemms the term
+# Stemms the term with Porter's stemming algorithm
 def stemWord(token):
     porter = PorterStemmer()
     stemmed = porter.stem(token)
     return stemmed
 
+# Adds the term to the postings list
 def addtoPostings(term, docID, pos):
-    if term in postings:             
-            
+    if term in postings:               
         # Check if the term has existed in that DocID before. 
         if docID in postings[term][0]: 
             postings[term][0][docID].append(pos) 
             # increment termFreq every time term appears in same doc
             postings[term][0][docID][0] = postings[term][0][docID][0] + 1
-                
         else: 
             # add the position to the doc
             postings[term][0][docID] = [1, pos] 
@@ -125,16 +129,18 @@ def addtoPostings(term, docID, pos):
         postings[term] = [] 
         # The postings list is initially empty. 
         postings[term].append({})       
-        # Add doc ID, termFreq, and position to the postings list 
+        # Add doc ID, term frequency in doc, and position to the postings list 
         postings[term][0][docID] = [1, pos] 
 
-
+# Adds the term to the dictionary with frequency 1, 
+# if already present add 1 to the frequency
 def addtoDict(term):
     if term in mainDict:
         mainDict[term] += 1
     else:
         mainDict[term] = 1
 
+# prints the dictionary into the output file dictionary.txt
 def exportDict(mainDict):
     docName = "..\output\dictionary.txt"
     newDoc = open(docName, "w+")	               
@@ -142,10 +148,10 @@ def exportDict(mainDict):
     for key in sorted(mainDict):
         newDoc.write("%s: %s" % (key, mainDict[key]) + "\n")
 
+# prints the postings list into the output file postings.txt
 def exportPostings(postings):
     docName = "..\output\postings.txt"
     newDoc = open(docName, "w+")
-
     for key in sorted(postings):
         newDoc.write("%s: %s" % (key, postings[key]) + "\n")
 
