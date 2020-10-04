@@ -27,7 +27,7 @@ def generateLists(filepath):
         docID = 0
         pos = 1
         while line:
-            # Index
+            # Index, keeps track of docID
             if ".I" in line:
                 docID += 1
                 pos = 1
@@ -52,7 +52,10 @@ def generateLists(filepath):
             if ".B" in line:
                 line = fp.readline()
                 date = line[5:]
-                pos = tokenize(date, docID, pos)
+                date = date.strip()
+                addtoDict(date)
+                addtoPostings(date, docID, pos)
+                pos += 1
 
             line = fp.readline()
             cnt += 1
