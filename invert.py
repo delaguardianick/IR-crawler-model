@@ -2,7 +2,6 @@ import time
 import string
 from nltk.stem.porter import PorterStemmer
 
-start_time = time.time()
 mainDict =  {}
 postings = {}
 useStopWords = False
@@ -10,6 +9,7 @@ useStemming = False
 
 # Driver function
 def invert(filepath, stop, stem):
+    start_time = time.time()
     global useStopWords
     global useStemming
     useStopWords = stop
@@ -17,7 +17,7 @@ def invert(filepath, stop, stem):
     generateLists(filepath)
     exportDict(mainDict)
     exportPostings(postings)
-    print("--- %s seconds ---" % (time.time() - start_time))
+    print("Time to generate lists: %.2f seconds" % (time.time() - start_time))
     return (mainDict, postings)
 
 # Get all the relevant lines from the doc and calls tokenize on them
@@ -148,7 +148,7 @@ def addtoDict(term):
 def exportDict(mainDict):
     docName = "..\output\dictionary.txt"
     newDoc = open(docName, "w+")	          
-         
+
     # mainDict = (x for x in mainDict if x is not None)
     for key in sorted(mainDict):
         newDoc.write("%s: %s" % (key, mainDict[key]) + "\n")
