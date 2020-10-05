@@ -18,6 +18,7 @@ def invert(filepath, stop, stem):
     exportDict(mainDict)
     exportPostings(postings)
     print("--- %s seconds ---" % (time.time() - start_time))
+    return (mainDict, postings)
 
 # Get all the relevant lines from the doc and calls tokenize on them
 def generateLists(filepath):
@@ -28,18 +29,18 @@ def generateLists(filepath):
         pos = 1
         while line:
             # Index, keeps track of docID
-            if ".I" in line:
+            if ".I" == line[:2]:
                 docID += 1
                 pos = 1
 
             # Title
-            if ".T" in line:
+            if ".T" == line[:2]:
                 title = fp.readline()
                 # print(title.strip())
                 pos = tokenize(title, docID, pos)
 
             # Abstract
-            if ".W" in line:
+            if ".W" == line[:2]:
                 abstract = ""
                 line = fp.readline()
                 while(".B" not in line):
@@ -49,13 +50,14 @@ def generateLists(filepath):
                 pos = tokenize(abstract, docID, pos)
 
             # Publication Date
-            if ".B" in line:
+            if ".B" == line[:2]:
                 line = fp.readline()
                 date = line[5:]
-                date = date.strip()
+                date = date.strip().lower()
                 addtoDict(date)
                 addtoPostings(date, docID, pos)
                 pos += 1
+               
 
             line = fp.readline()
             cnt += 1
@@ -67,34 +69,30 @@ def tokenize(string, docID, pos):
     for token in tokens:
         token = preProcess(token)
         # pass if null
-        if token == None:
+        if token != "" and token != None:
             pass
-        addtoDict(token)
-        addtoPostings(token, docID, pos)
-        pos += 1
+            addtoDict(token)
+            addtoPostings(token, docID, pos)
+            pos += 1
     return pos
 
 # Cleans the string - removes punctuation, whitespace etc
 # Calls useStemming and stopword functions if True
 def preProcess(token):
-    foundStopWord = False
-    token = token.strip()
-    token = token.lower()
+    token = token.strip().lower()
     table = str.maketrans('', '', string.punctuation)
     token = token.translate(table)
+    
     # if useStopWords is True, call function
     if useStopWords:
         token = filterStopWord(token) 
-        if token == None:
-            foundStopWord = True
     
     # If useStemming is True and token is not a stop work, stem the word
-    if useStemming and not foundStopWord:
+    if useStemming:
         token = stemWord(token)
     
     # If the token is not a stop word, return the token to be added to lists
-    if not foundStopWord:
-        return token
+    return token
 
 # NoneType error
 # Not working currently
@@ -102,10 +100,11 @@ def filterStopWord(token):
     filepath =  "../cacm.tar/common_words"
     with open(filepath, 'r') as fp:
         stop_words = fp.read()
+    if token == None:
+        print("FOUND A NONE")
     if token in stop_words:
-        return None
-    else: 
-        return token
+        token = ""
+    return token
 
 # Stemms the term with Porter's stemming algorithm
 def stemWord(token):
@@ -158,4 +157,4 @@ def exportPostings(postings):
     for key in sorted(postings):
         newDoc.write("%s: %s" % (key, postings[key]) + "\n")
 
-invert('..\cacm.tar\cacm.all', False, False)
+# invert('..\cacm.tar\cacm.all', True, False)
