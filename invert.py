@@ -28,6 +28,7 @@ def generateLists(filepath):
         docID = 0
         pos = 1
         while line:
+
             # Index, keeps track of docID
             if ".I" == line[:2]:
                 docID += 1
@@ -68,7 +69,6 @@ def tokenize(string, docID, pos):
     tokens = string.split()
     for token in tokens:
         token = preProcess(token)
-        # pass if null
         if token != "" and token != None:
             pass
             addtoDict(token)
@@ -114,10 +114,12 @@ def stemWord(token):
 
 # Adds the term to the postings list
 def addtoPostings(term, docID, pos):
-    if term in postings:               
+    if term in postings:              
+
         # Check if the term has existed in that DocID before. 
         if docID in postings[term][0]: 
             postings[term][0][docID].append(pos) 
+
             # increment termFreq every time term appears in same doc
             postings[term][0][docID][0] = postings[term][0][docID][0] + 1
         else: 
@@ -145,7 +147,8 @@ def addtoDict(term):
 # prints the dictionary into the output file dictionary.txt
 def exportDict(mainDict):
     docName = "..\output\dictionary.txt"
-    newDoc = open(docName, "w+")	               
+    newDoc = open(docName, "w+")	          
+         
     # mainDict = (x for x in mainDict if x is not None)
     for key in sorted(mainDict):
         newDoc.write("%s: %s" % (key, mainDict[key]) + "\n")
