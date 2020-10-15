@@ -6,18 +6,23 @@ stem = False
 mainDict = {}
 postings = {}
 
-def test():
+def test(stem):
     term = ""
     while(term != None):
         # Ask for user to input the term
         term = input("Term: ")
         start_time = time.time()
 
+        # Terminate on command
         if (term == "ZZEND"):
             break
+
+        # Stem input
+        if (stem):
+            term = invert.stemWord(term)
+
         elif (term not in mainDict):
             print("Word not found")
-
         # Print doc frequency
         else:
             print("Doc Frequency: {}\n".format(mainDict[term]))
@@ -44,7 +49,8 @@ def test():
 
                 print("Context: {}".format(context.strip()))
                 # time it took to search term
-                print("Search time: %.2f seconds" % (time.time() - start_time))
+                search_time = (time.time() - start_time)
+                print("Search time: %.2f seconds" % (search_time))
                 input("\nPress any key")
 
 # Read cacm file, find docID and read its title
@@ -77,26 +83,26 @@ def getTitleAndContext(docID, term):
     return title, context
 
 
-def test1(filepath, stop, stem):
+def test1(filepath):
     global stop
     global stem
     global mainDict
     global postings
 
-    i1 = input("Remove stop words? (y/n)")
+    i1 = input("Remove stop words? (y/n) ")
     if i1 == "y":
         stop = True
     elif i1 == "n":
         stop == False
 
-    i2 = input("Activate stemming? (y/n)")
+    i2 = input("Activate stemming? (y/n) ")
     if i1 == "y":
         stem = True
     elif i1 == "n":
         stem == False
 
-    mainDict, postings = invert.invert(filepath, False, False)
-    test()
+    mainDict, postings = invert.invert(filepath, stop, stem)
+    test(stem)
 
 filepath = '..\cacm.tar\cacm.all'
 test1(filepath)
