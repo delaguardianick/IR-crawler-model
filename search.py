@@ -10,7 +10,8 @@ N = 0
 
 def search(filepath):
     callInvert(filepath)
-    generateDocVectors()
+    query = getQuery()
+    generateDocVectors(query)
     print(mostSimilar())
 
 def getQuery():
@@ -18,13 +19,12 @@ def getQuery():
     inputList = Q.split()
     return inputList
 
-def generateDocVectors():
+def generateDocVectors(query):
     global N
     N = invert.getNumberOfDocs() 
     terms = sorted(postings.keys()) # Get all terms in postings sorted
     termID = -1  # Counter to track index of term in postings
     N = invert.getNumberOfDocs() #Size of postings array - used for IDF
-    query = getQuery()
 
     # for each term in postings
     for term in terms:
@@ -129,7 +129,10 @@ def mostSimilar():
             ranking.append((i, round(vect[i],4)))
             ranking = sorted(ranking, key=lambda x: x[1])
 
-    return ranking
+    if ranking == []:
+        return ("No results produced, please try a different query.")
+    else:
+        return ranking[:10]
 
 def sim(docID, Q):
     vDoc = documentsVectors[docID]
@@ -149,7 +152,10 @@ def vectorMultiply(vDoc, vQ):
     sum = 0
     for i in range(len(vDoc)):
         sum += vDoc[i] * vQ[i]
-    similarity = sum / (lenVDoc * lenVQ)
+    if (lenVDoc * lenVQ) == 0:
+        similarity = 0
+    else:
+        similarity = sum / (lenVDoc * lenVQ)
     return similarity
 
 def initSimVector():
@@ -166,6 +172,6 @@ def vectorLength(vector):
     length = math.sqrt(total)
     return length
 
-filepath = '..\cacm.tar\cacmREDUCED.all'
+filepath = '..\cacm.tar\cacm.all'
 search(filepath)
 
