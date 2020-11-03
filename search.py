@@ -1,49 +1,70 @@
 import invert
+import math
 
 stop = False
 stem = False
 mainDict = {}
 postings = {}
+documentsVectors = {}
+
+def sim(Doc, Q):
+    None
 
 
-def search():
-    # Get all terms in postings sorted
-    terms = sorted(postings.keys())
+def generateDocVectors():
+    terms = sorted(postings.keys()) # Get all terms in postings sorted
+    termID = -1  # Counter to track index of term in postings
+    N = invert.getNumberOfDocs() #Size of postings array - used for IDF
 
-    # Counter to track index of term in postings
-    termID = -1 
     # for each term in postings
     for term in terms:
         termID += 1
-        # Gets value for every term
-        value = postings[term][0]
+        value = postings[term][0] # Gets value for every term
+        docIDs = value.keys() # Gets all docIDs for every term
 
-        # Gets all docIDs for every term
-        docIDs = value.keys()
+        # IDF
+        if "IDF" not in documentsVectors:
+                initDocVector("IDF")
+
+        DFi = len(docIDs)
+        IDF = calcIDF(N, DFi)
+        documentsVectors["IDF"][termID] = IDF
 
         # For each docID, get the vector of the doc and update 
         # the proper index (termID) with the term frequency in that doc
         for docID in docIDs:
             if docID not in documentsVectors:
-                initDoc(docID)
+                initDocVector(docID)
 
-            termFreq = value[docID][0]
-            documentsVectors[docID][termID] = termFreq
+            F = value[docID][0]
+            TF = 1 + math.log10(F)
+            IDFi = documentsVectors["IDF"][termID]
+            documentsVectors[docID][termID] = TF * IDFi
 
-    print(documentsVectors)
+    # print(documentsVectors['IDF'])
+    # printVectors()
 
-documentsVectors = {}
+def printVectors():
+    for vector in documentsVectors:
+        print ("{} : {}".format(vector, documentsVectors[vector]))
 
-def initDoc(docID):
+def calcIDF(N, DFi):
+    # N = len(postings.keys())
+    IDF = math.log10(N / DFi)
+    # print ("{} / {} = {}".format(N,DFi,IDF))
+
+    return IDF
+    
+
+# Initializes the document vector to the length of postings. 
+# All indexes initially 0
+def initDocVector(docID):
         terms = postings.keys()
         documentsVectors[docID] = [0] 
         for i in range(len(terms)-1):
             documentsVectors[docID].append(0)
-
     # print (documentsVectors)
 
-
-    
 def callInvert(filepath):
     global stop
     global stem
@@ -63,8 +84,7 @@ def callInvert(filepath):
     #     stem == False
 
     mainDict, postings = invert.invert(filepath, stop, stem)
-    search()
+    generateDocVectors()
 
 filepath = '..\cacm.tar\cacmREDUCED.all'
 callInvert(filepath)
-initDoc(1)
