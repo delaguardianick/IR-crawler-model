@@ -7,9 +7,42 @@ mainDict = {}
 postings = {}
 documentsVectors = {}
 
-def sim(Doc, Q):
-    None
+def search():
+    generateDocVectors()
+    sim(1,2)
 
+def sim(docID, Q):
+    vDoc = documentsVectors[docID]
+    vQ = documentsVectors[Q]
+    lenVDoc = vectorLength(vDoc)
+    lenVQ = vectorLength(vQ)
+    
+    if "sim" not in documentsVectors:
+        initSimVector()
+
+    # Vector multiplication
+    sum = 0
+    for i in range(len(vDoc)):
+        sum += vDoc[i] * vQ[i]
+
+    similarity = sum / (lenVDoc * lenVQ)
+    documentsVectors["sim"][docID] = similarity
+    
+    # print(documentsVectors["sim"])
+
+def initSimVector():
+    documentsVectors["sim"] = []
+    N = invert.getNumberOfDocs()
+    for i in range(N):
+        documentsVectors["sim"].append(None)
+
+def vectorLength(vector):
+    # sqrt(i^2 + i2^2 + i3^2 ...)
+    total = 0
+    for weight in vector:
+        total += (weight**2)
+    length = math.sqrt(total)
+    return length
 
 def generateDocVectors():
     terms = sorted(postings.keys()) # Get all terms in postings sorted
@@ -84,7 +117,7 @@ def callInvert(filepath):
     #     stem == False
 
     mainDict, postings = invert.invert(filepath, stop, stem)
-    generateDocVectors()
+    search()
 
 filepath = '..\cacm.tar\cacmREDUCED.all'
 callInvert(filepath)
