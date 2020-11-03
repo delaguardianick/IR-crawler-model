@@ -9,45 +9,27 @@ documentsVectors = {}
 
 def search():
     generateDocVectors()
-    sim(1,2)
+    # sim(1,"Q")
+    # sim(2,"Q")
+    # print(documentsVectors[1])
+    # print(documentsVectors["IDF"])
+    # print(documentsVectors["Q"])
 
-def sim(docID, Q):
-    vDoc = documentsVectors[docID]
-    vQ = documentsVectors[Q]
-    lenVDoc = vectorLength(vDoc)
-    lenVQ = vectorLength(vQ)
-    
-    if "sim" not in documentsVectors:
-        initSimVector()
+def getQuery():
+    input = "roots of language december digital computers"
+    return input
 
-    # Vector multiplication
-    sum = 0
-    for i in range(len(vDoc)):
-        sum += vDoc[i] * vQ[i]
-
-    similarity = sum / (lenVDoc * lenVQ)
-    documentsVectors["sim"][docID] = similarity
-    
-    # print(documentsVectors["sim"])
-
-def initSimVector():
-    documentsVectors["sim"] = []
-    N = invert.getNumberOfDocs()
-    for i in range(N):
-        documentsVectors["sim"].append(None)
-
-def vectorLength(vector):
-    # sqrt(i^2 + i2^2 + i3^2 ...)
-    total = 0
-    for weight in vector:
-        total += (weight**2)
-    length = math.sqrt(total)
-    return length
+def modVQ():
+    for F in documentsVectors["Q"]:
+        TF = 1 + math.log10(F)
+    # IDFi = documentsVectors["IDF"][termID]
+    # documentsVectors[docID][termID] = TF * IDFi
 
 def generateDocVectors():
     terms = sorted(postings.keys()) # Get all terms in postings sorted
     termID = -1  # Counter to track index of term in postings
     N = invert.getNumberOfDocs() #Size of postings array - used for IDF
+    query = getQuery()
 
     # for each term in postings
     for term in terms:
@@ -58,24 +40,44 @@ def generateDocVectors():
         # IDF
         if "IDF" not in documentsVectors:
                 initDocVector("IDF")
+        calcWeights("IDF",termID,docIDs, value)
 
-        DFi = len(docIDs)
-        IDF = calcIDF(N, DFi)
-        documentsVectors["IDF"][termID] = IDF
+        # Query
+        if "Q" not in documentsVectors:
+            initDocVector("Q")
+        if term in query:
+            documentsVectors["Q"][termID] = documentsVectors["Q"][termID] + 1
+        calcWeights("Q",termID,docIDs, value)
 
         # For each docID, get the vector of the doc and update 
         # the proper index (termID) with the term frequency in that doc
         for docID in docIDs:
             if docID not in documentsVectors:
                 initDocVector(docID)
+            calcWeights(docID, termID, docIDs, value)
 
-            F = value[docID][0]
+def calcWeights(docID, termID, docIDs, value):
+    # IDFi = log(N/dfi)
+    if docID == "IDF":
+        N = invert.getNumberOfDocs() 
+        DFi = len(docIDs)
+        IDF = calcIDF(N, DFi)
+        documentsVectors["IDF"][termID] = IDF
+    
+    # TF = 1 + log(F) ; W = TF * IDFi
+    if docID == "Q":
+        F = documentsVectors["Q"][termID]
+        if F != 0:
             TF = 1 + math.log10(F)
             IDFi = documentsVectors["IDF"][termID]
-            documentsVectors[docID][termID] = TF * IDFi
+            documentsVectors["Q"][termID] = TF * IDFi
 
-    # print(documentsVectors['IDF'])
-    # printVectors()
+    # TF = 1 + log(F) ; W = TF * IDFi
+    if isinstance(docID, int):
+        F = value[docID][0]
+        TF = 1 + math.log10(F)
+        IDFi = documentsVectors["IDF"][termID]
+        documentsVectors[docID][termID] = TF * IDFi   
 
 def printVectors():
     for vector in documentsVectors:
@@ -118,6 +120,39 @@ def callInvert(filepath):
 
     mainDict, postings = invert.invert(filepath, stop, stem)
     search()
+
+def sim(docID, Q):
+    vDoc = documentsVectors[docID]
+    vQ = documentsVectors[Q]
+    lenVDoc = vectorLength(vDoc)
+    lenVQ = vectorLength(vQ)
+    
+    if "sim" not in documentsVectors:
+        initSimVector()
+
+    # Vector multiplication
+    sum = 0
+    for i in range(len(vDoc)):
+        sum += vDoc[i] * vQ[i]
+
+    similarity = sum / (lenVDoc * lenVQ)
+    documentsVectors["sim"][docID] = similarity
+    
+    # print(documentsVectors["sim"])
+
+def initSimVector():
+    documentsVectors["sim"] = []
+    N = invert.getNumberOfDocs()
+    for i in range(N):
+        documentsVectors["sim"].append(None)
+
+def vectorLength(vector):
+    # sqrt(i^2 + i2^2 + i3^2 ...)
+    total = 0
+    for weight in vector:
+        total += (weight**2)
+    length = math.sqrt(total)
+    return length
 
 filepath = '..\cacm.tar\cacmREDUCED.all'
 callInvert(filepath)
