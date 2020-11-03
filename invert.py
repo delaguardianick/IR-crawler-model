@@ -6,6 +6,7 @@ mainDict =  {}
 postings = {}
 useStopWords = False
 useStemming = False
+allIDs = []
 
 # Driver function
 def invert(filepath, stop, stem):
@@ -33,6 +34,7 @@ def generateLists(filepath):
             if ".I" == line[:2]:
                 docID += 1
                 pos = 1
+                allIDs.append(docID) #used for search.py (finding N for IDF calculation)
 
             # Title
             if ".T" == line[:2]:
@@ -79,7 +81,7 @@ def tokenize(string, docID, pos):
 # Cleans the string - removes punctuation, whitespace etc
 # Calls useStemming and stopword functions if True
 def preProcess(token):
-    token = token.strip().lower()
+    token = token.lower().strip()
     table = str.maketrans('', '', string.punctuation)
     token = token.translate(table)
     
@@ -97,11 +99,9 @@ def preProcess(token):
 # NoneType error
 # Not working currently
 def filterStopWord(token):
-    filepath =  "../cacm.tar/common_words"
+    filepath =  "../cacm.tar/stopwords.txt"
     with open(filepath, 'r') as fp:
         stop_words = fp.read()
-    if token == None:
-        print("FOUND A NONE")
     if token in stop_words:
         token = ""
     return token
@@ -160,4 +160,8 @@ def exportPostings(postings):
     for key in sorted(postings):
         newDoc.write("%s: %s" % (key, postings[key]) + "\n")
 
-# invert('..\cacm.tar\cacm.all', True, False)
+def getNumberOfDocs():
+    return int(max(allIDs))
+
+
+# invert('..\cacm.tar\cacm.all', False, False)
