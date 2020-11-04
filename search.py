@@ -4,29 +4,43 @@ import time
 
 stop = False
 stem = False
+filepath = '..\cacm.tar\cacm.all'
 mainDict = {}
 postings = {}
 documentsVectors = {}
 N = 0
 
-def search(filepath):
+# def main():
+#     resp = input("Interface? (y/n")
+#     if resp == n:
+
+def search(filepath, recurrent):
     callInvert(filepath)
-    query = getQuery()
-    start_time = time.time()
+    # start_time = time.time()
     generateDocVectors()
+    query = ""
+    query = getQuery()
     generateQueryVector(query)
     ranking = mostSimilar()
-    ranking_time = (time.time() - start_time)
-    print("Ranking list : {}\nTime to generate ranking: %.2f".format(ranking) % (ranking_time))
+    # ranking_time = (time.time() - start_time)
+    print("Ranking list : {}".format(ranking))
+    # print("Time to generate ranking: %.2f" % ranking_time)
+    return ranking    
+
+def interface(filepath):
+    ranking = search(filepath, True)
     start_time = time.time()
     getTitleAndAuthor(ranking)
     author_time = (time.time() - start_time)
     print("Time to generate authors and titles: %.2f" % author_time)
     
-
 def getQuery():
+    global stem
+    global stop
     Q = input("Search: ")
     inputList = Q.split()
+    for i in range(len(inputList)):
+        inputList[i] = invert.preProcess(inputList[i],stop,stem)
     return inputList
 
 def generateQueryVector(query):
@@ -129,17 +143,17 @@ def callInvert(filepath):
     global mainDict
     global postings
 
-    # i1 = input("Remove stop words? (y/n) ")
-    # if i1 == "y":
-    #     stop = True
-    # elif i1 == "n":
-    #     stop == False
+    i1 = input("Remove stop words? (y/n) ")
+    if i1 == "y":
+        stop = True
+    elif i1 == "n":
+        stop = False
 
-    # i2 = input("Activate stemming? (y/n) ")
-    # if i1 == "y":
-    #     stem = True
-    # elif i1 == "n":
-    #     stem == False
+    i2 = input("Activate stemming? (y/n) ")
+    if i2 == "y":
+        stem = True
+    elif i2 == "n":
+        stem = False
 
     mainDict, postings = invert.invert(filepath, stop, stem)
 
@@ -158,7 +172,7 @@ def mostSimilar():
     if ranking == []:
         return ("No results produced, please try a different query.")
     else:
-        return ranking[:10]
+        return ranking[:5]
 
 def sim(docID, Q):
     vDoc = documentsVectors[docID]
@@ -233,6 +247,7 @@ def getTitleAndAuthor(ranking):
 
             print("Document ID: {}, \nTitle: {}, \nAuthor: {}\n".format(docID, title.strip(), author))
 
-filepath = '..\cacm.tar\cacm.all'
-search(filepath)
+
+# interface(filepath)
+search(filepath, True)
 
