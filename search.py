@@ -1,5 +1,6 @@
 import invert
 import math
+import time
 
 stop = False
 stem = False
@@ -11,15 +12,40 @@ N = 0
 def search(filepath):
     callInvert(filepath)
     query = getQuery()
-    generateDocVectors(query)
-    print(mostSimilar())
+    start_time = time.time()
+    generateDocVectors()
+    generateQueryVector(query)
+    ranking = mostSimilar()
+    ranking_time = (time.time() - start_time)
+    print("Ranking list : {}\nTime to generate ranking: %.2f".format(ranking) % (ranking_time))
+    start_time = time.time()
+    getTitleAndAuthor(ranking)
+    author_time = (time.time() - start_time)
+    print("Time to generate authors and titles: %.2f" % author_time)
+    
 
 def getQuery():
     Q = input("Search: ")
     inputList = Q.split()
     return inputList
 
-def generateDocVectors(query):
+def generateQueryVector(query):
+    terms = sorted(postings.keys())
+    termID = -1
+    for term in terms:
+        termID += 1
+        value = postings[term][0] # Gets value for every term
+        docIDs = value.keys()
+        for docID in docIDs:
+            if "Q" not in documentsVectors:
+                initDocVector("Q")
+            # print("{} {} = {}".format(term, query, term == query))
+            if term.strip() in query:
+                documentsVectors["Q"][termID] = documentsVectors["Q"][termID] + 1
+
+        calcWeights("Q",termID,docIDs, value)
+
+def generateDocVectors():
     global N
     N = invert.getNumberOfDocs() 
     terms = sorted(postings.keys()) # Get all terms in postings sorted
@@ -45,13 +71,13 @@ def generateDocVectors(query):
             calcWeights(docID, termID, docIDs, value)
 
             # Query
-            if "Q" not in documentsVectors:
-                initDocVector("Q")
-            # print("{} {} = {}".format(term, query, term == query))
-            if term.strip() in query:
-                documentsVectors["Q"][termID] = documentsVectors["Q"][termID] + 1
+            # if "Q" not in documentsVectors:
+            #     initDocVector("Q")
+            # # print("{} {} = {}".format(term, query, term == query))
+            # if term.strip() in query:
+            #     documentsVectors["Q"][termID] = documentsVectors["Q"][termID] + 1
         
-        calcWeights("Q",termID,docIDs, value)
+        # calcWeights("Q",termID,docIDs, value)
 
 def calcWeights(docID, termID, docIDs, value):
     # IDFi = log(N/dfi)
@@ -171,6 +197,41 @@ def vectorLength(vector):
         total += (weight**2)
     length = math.sqrt(total)
     return length
+
+def getTitleAndAuthor(ranking):
+    if isinstance(ranking, str):
+        pass
+    else:
+        for tuple in ranking:
+            docID = tuple[0]
+
+            # Open file
+            index = ".I {}".format(docID)
+            f = open(filepath, 'r')
+            line = f.readline()
+            author = ""
+            title = ""
+            while line:
+                # If line contains docID we want
+                if index == line.strip():
+                    line = f.readline() #.T
+                    line = f.readline() # title
+
+                    # append title if multiline
+                    while ((".W" != line[:2]) and (".B" != line[:2])):
+                        title += line
+                        line = f.readline()
+
+                    while (".A" != line[:2]):
+                        line = f.readline()
+
+                    if ".A" == line[:2]:
+                        line = f.readline()
+                        author = line.strip()
+                else:
+                    line = f.readline()
+
+            print("Document ID: {}, \nTitle: {}, \nAuthor: {}\n".format(docID, title.strip(), author))
 
 filepath = '..\cacm.tar\cacm.all'
 search(filepath)
