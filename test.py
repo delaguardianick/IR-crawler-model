@@ -12,6 +12,7 @@ def test(stem):
         # Ask for user to input the term
         term = input("Term: ")
         start_time = time.time()
+        print("input: {}".format(term)) ####
 
         # Terminate on command
         if (term == "ZZEND"):
@@ -20,11 +21,13 @@ def test(stem):
         # Stem input
         if (stem):
             term = invert.stemWord(term)
-
+            
         elif (term not in mainDict):
             print("Word not found")
         # Print doc frequency
+        
         else:
+            print("input: {}".format(term)) ####
             print("Doc Frequency: {}\n".format(mainDict[term]))
             posting = postings[term][0]
             # print (posting)
@@ -57,24 +60,24 @@ def test(stem):
 def getTitleAndContext(docID, term):
     # Open file
     context = ""
-    search = ".I {}".format(docID)
+    index = ".I {}".format(docID)
     f = open(filepath, 'r')
     line = f.readline()
     title = ""
     while line:
-        # If line contains a new index e.i ".I"
-        if search in line:
+        # If line contains docID we want
+        if index in line:
             line = f.readline() #.T
             line = f.readline() # title
 
             # append title if multiline
-            while ((".W" not in line) and (".B" not in line)):
+            while ((".W" != line[:2]) and (".B" != line[:2])):
                 title += line
                 line = f.readline()
                 if term in line: #if term is in the title
                     context = line
             # check same docID for term
-            while (".I" not in line):
+            while (".T" != line[:2]):
                 if term in line:
                     context = line
                 line = f.readline()
@@ -88,18 +91,18 @@ def test1(filepath):
     global stem
     global mainDict
     global postings
-
+    
     i1 = input("Remove stop words? (y/n) ")
     if i1 == "y":
         stop = True
     elif i1 == "n":
-        stop == False
+        stop = False
 
     i2 = input("Activate stemming? (y/n) ")
-    if i1 == "y":
+    if i2 == "y":
         stem = True
-    elif i1 == "n":
-        stem == False
+    elif i2 == "n":
+        stem = False
 
     mainDict, postings = invert.invert(filepath, stop, stem)
     test(stem)
