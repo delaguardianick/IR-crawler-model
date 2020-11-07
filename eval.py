@@ -1,4 +1,4 @@
-import search
+# import search
 import re
 # Inputs: query.text, qrels.text
 # Go through all queries in query.text
@@ -10,8 +10,8 @@ pathQueries ='..\cacm.tar\query.text'
 pathQrels = '..\cacm.tar\qrels.text'
 
 def getQueries():
-    with open(pathQueries, 'r') as fQu:
-        line = fQu.readline()
+    with open(pathQueries, 'r') as fQ:
+        line = fQ.readline()
         queryNum = 0
         query = ""
         count = 0
@@ -25,29 +25,59 @@ def getQueries():
                         
             if re.match('\.W$', line):
                 query= ""
-                line = fQu.readline()
+                line = fQ.readline()
                 while( (not re.match('\.N$', line)) and (not re.match('\.A$', line))):
                     query += line
-                    line = fQu.readline()
+                    line = fQ.readline()
                 print("{}".format(query))
             
             if ".A" == line[:2]:
                 authors = []
-                line = fQu.readline()
+                line = fQ.readline()
                 while (".N" != line[:2]):
                     authors.append(line.strip())
-                    line = fQu.readline()
+                    line = fQ.readline()
                 print("{}".format(authors))
 
             if ".N" == line[:2]:
                 N = ""
-                line = fQu.readline()
+                line = fQ.readline()
                 while (not re.match('^\s*$', line)):
                     N += line
-                    line = fQu.readline()
-                print("{}".format(N))
+                    line = fQ.readline()
+                # print("{}".format(N))
 
+            
+            line = fQ.readline()
             # print ("Q{}: {} by {}\n N = ".format(queryNum, query, authors, ))
-            line = fQu.readline()
         print (count)
-getQueries()
+
+def getRels():
+    with open(pathQrels, 'r') as fQrel:
+        listofLists = [[]]
+        line = fQrel.readline()
+        Q = "01"
+        while line:
+            rankList = []
+            prev = Q
+            while line[:2] == Q:
+                docID = line[3:7]
+                rankList.append(docID)
+                line = fQrel.readline()
+    
+            if int(Q) != int(prev) + 1 :
+                print("{} = {}+1".format(Q,prev))
+                # rankList.append([])
+                # continue
+            listofLists.append(rankList)
+            # print("{}: {}".format(Q, rankList))
+            Q = line[:2]
+            continue
+    print(len(listofLists))
+    # printRels(listofLists)
+
+def printRels(ls):
+    for i in range(len(ls)):
+        print("{}: {}".format(i, ls[i]))
+# getQueries()
+getRels()
