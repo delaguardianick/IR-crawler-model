@@ -15,6 +15,7 @@ K = 5
 # In a module so it doesnt re-generate when search is called.
 def setup(filepath):
     callInvert(filepath)
+    print("Generating Vectors...")
     generateDocVectors()
 
 # Main driver function
@@ -22,7 +23,9 @@ def setup(filepath):
 def search(Q):
     query = getQuery(Q) # formats and pre-processes query
     generateQueryVector(query)
+    genRankingforQ = time.time()
     ranking = mostSimilar() # finds most relevant doc to query
+    print("Time to generate ranking: {}".format(time.time() - genRankingforQ))
     return ranking    
 
 # Alternative to setup and search. Allows for multiple searches.
@@ -164,14 +167,12 @@ def initDocVector(docID):
             documentsVectors[docID].append(0)
     # print (documentsVectors)
 
-# 
+# Checks sim() of all documents
 def mostSimilar():
     N = invert.getNumberOfDocs()
 
     for i in range(1, N):
         sim(i,"Q")
-
-    doc = None
     vect = documentsVectors["sim"]
     ranking = []
     for i in range(len(vect)):
@@ -256,7 +257,6 @@ def callInvert(filepath):
     mainDict, postings = invert.invert(filepath, stop, stem)
 
 # interface()
-# setup(filepath)
-# print(search("""Articles on text formatting systems, including "what you see is what you)
-# get" systems.  Examples: t/nroff, scribe, bravo.""")
 # print(search("computer"))
+setup(filepath)
+print(search(""))
