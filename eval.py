@@ -18,6 +18,12 @@ rels = {} #Holds all rankingslists for each query from qrels.text
 filepathcacmAll = '..\cacm.tar\cacm.all'
 queryRankings = {}
 
+def eval():
+    search.setup(filepathcacmAll)
+    getQueries()
+    getRels()
+    compareALL()
+
 # Goes through query.text, one query at a time
 # and saves all queryNum(bers), W (Abstracts), A(uthors), and N into dict(queries)
 def getQueries():
@@ -134,7 +140,4 @@ def compare(ret, rel):
     print(apq, rPrecision)
     return apq, rPrecision            
 
-search.setup(filepathcacmAll)
-getQueries()
-getRels()
-compareALL()
+eval()
