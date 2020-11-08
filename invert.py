@@ -60,7 +60,15 @@ def generateLists(filepath):
                 addtoDict(date)
                 addtoPostings(date, docID, pos)
                 pos += 1
-               
+            
+            if ".A" == line[:2]:
+                while (".N" != line[:2]):
+                    line = fp.readline()
+                    author = line
+                    author = author.strip()
+                    addtoDict(author)
+                    addtoPostings(author, docID, pos)
+                    pos += 1
 
             line = fp.readline()
             cnt += 1
@@ -70,7 +78,7 @@ def generateLists(filepath):
 def tokenize(string, docID, pos):
     tokens = string.split()
     for token in tokens:
-        token = preProcess(token)
+        token = preProcess(token, useStopWords, useStemming)
         if token != "" and token != None:
             pass
             addtoDict(token)
@@ -80,17 +88,17 @@ def tokenize(string, docID, pos):
 
 # Cleans the string - removes punctuation, whitespace etc
 # Calls useStemming and stopword functions if True
-def preProcess(token):
+def preProcess(token, stop, stem):
     token = token.lower().strip()
     table = str.maketrans('', '', string.punctuation)
     token = token.translate(table)
     
     # if useStopWords is True, call function
-    if useStopWords:
+    if stop:
         token = filterStopWord(token) 
     
     # If useStemming is True and token is not a stop work, stem the word
-    if useStemming:
+    if stem:
         token = stemWord(token)
     
     # If the token is not a stop word, return the token to be added to lists

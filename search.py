@@ -8,52 +8,58 @@ filepath = '..\cacm.tar\cacm.all'
 mainDict = {}
 postings = {}
 documentsVectors = {}
-N = 0
+# N = 0
+K = 5
 
-# def main():
-#     resp = input("Interface? (y/n")
-#     if resp == n:
-
-def search(filepath, recurrent):
+# Calls invert and generates doc vectors
+# In a module so it doesnt re-generate when search is called.
+def setup(filepath):
     callInvert(filepath)
-    # start_time = time.time()
     generateDocVectors()
-    query = ""
-    query = getQuery()
+
+# Main driver function
+# Produces ranking for input Q
+def search(Q):
+    query = getQuery(Q) # formats and pre-processes query
     generateQueryVector(query)
-    ranking = mostSimilar()
-    # ranking_time = (time.time() - start_time)
-    print("Ranking list : {}".format(ranking))
-    # print("Time to generate ranking: %.2f" % ranking_time)
+    ranking = mostSimilar() # finds most relevant doc to query
     return ranking    
 
-def interface(filepath):
-    ranking = search(filepath, True)
-    start_time = time.time()
-    getTitleAndAuthor(ranking)
-    author_time = (time.time() - start_time)
-    print("Time to generate authors and titles: %.2f" % author_time)
+# Alternative to setup and search. Allows for multiple searches.
+# Also returns titles and authors of returned documents
+def interface():
+    setup(filepath)
+    while(True):
+        ranking = search("")
+        start_time = time.time()
+        getTitleAndAuthor(ranking)
+        author_time = (time.time() - start_time)
+        print("Time to generate authors and titles: %.2f" % author_time)
     
-def getQuery():
+# Pre-processes string query into list of tokens
+def getQuery(query):
     global stem
     global stop
-    Q = input("Search: ")
-    inputList = Q.split()
+    if query == "":
+        query = input("Search: ")
+    inputList = query.split()
     for i in range(len(inputList)):
         inputList[i] = invert.preProcess(inputList[i],stop,stem)
     return inputList
 
+# Make a vector for the query (length = all terms in postings list)
+# If 
 def generateQueryVector(query):
     terms = sorted(postings.keys())
     termID = -1
     for term in terms:
+        # print(term)
         termID += 1
         value = postings[term][0] # Gets value for every term
         docIDs = value.keys()
         for docID in docIDs:
             if "Q" not in documentsVectors:
                 initDocVector("Q")
-            # print("{} {} = {}".format(term, query, term == query))
             if term.strip() in query:
                 documentsVectors["Q"][termID] = documentsVectors["Q"][termID] + 1
 
@@ -102,7 +108,7 @@ def calcWeights(docID, termID, docIDs, value):
         documentsVectors["IDF"][termID] = IDF
     
     # TF = 1 + log(F) ; W = TF * IDFi
-    if docID == "Q":
+    elif docID == "Q":
         # print (documentsVectors["Q"])
         F = documentsVectors["Q"][termID]
         if F != 0:
@@ -111,11 +117,12 @@ def calcWeights(docID, termID, docIDs, value):
             documentsVectors["Q"][termID] = TF * IDFi
 
     # TF = 1 + log(F) ; W = TF * IDFi
-    if isinstance(docID, int):
+    elif isinstance(docID, int):
         F = value[docID][0]
-        TF = 1 + math.log10(F)
-        IDFi = documentsVectors["IDF"][termID]
-        documentsVectors[docID][termID] = TF * IDFi   
+        if F != 0:
+            TF = 1 + math.log10(F)
+            IDFi = documentsVectors["IDF"][termID]
+            documentsVectors[docID][termID] = TF * IDFi   
 
 def printVectors():
     for vector in documentsVectors:
@@ -158,6 +165,8 @@ def callInvert(filepath):
     mainDict, postings = invert.invert(filepath, stop, stem)
 
 def mostSimilar():
+    N = invert.getNumberOfDocs()
+
     for i in range(1, N):
         sim(i,"Q")
 
@@ -172,7 +181,7 @@ def mostSimilar():
     if ranking == []:
         return ("No results produced, please try a different query.")
     else:
-        return ranking[:5]
+        return ranking
 
 def sim(docID, Q):
     vDoc = documentsVectors[docID]
@@ -248,6 +257,8 @@ def getTitleAndAuthor(ranking):
             print("Document ID: {}, \nTitle: {}, \nAuthor: {}\n".format(docID, title.strip(), author))
 
 
-# interface(filepath)
-search(filepath, True)
-
+# interface()
+# setup(filepath)
+# print(search("""Articles on text formatting systems, including "what you see is what you)
+# get" systems.  Examples: t/nroff, scribe, bravo.""")
+# print(search("computer"))
