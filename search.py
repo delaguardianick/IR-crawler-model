@@ -139,7 +139,7 @@ def calcWeights(docID, termID, docIDs, value):
         # N = invert.getNumberOfDocs() 
         DFi = len(docIDs)
         IDF = math.log10(N / DFi)
-        documentsVectors["IDF"][termID] = IDF
+        documentsVectors["IDF"][termID] = round(IDF,4)
     
     # TF = 1 + log(F) ; W = TF * IDFi
     elif docID == "Q":
@@ -148,7 +148,7 @@ def calcWeights(docID, termID, docIDs, value):
         if F != 0:
             TF = 1 + math.log10(F)
             IDFi = documentsVectors["IDF"][termID]
-            documentsVectors["Q"][termID] = TF * IDFi
+            documentsVectors["Q"][termID] = round(TF * IDFi, 4)
 
     # TF = 1 + log(F) ; W = TF * IDFi
     elif isinstance(docID, int):
@@ -156,7 +156,7 @@ def calcWeights(docID, termID, docIDs, value):
         if F != 0:
             TF = 1 + math.log10(F)
             IDFi = documentsVectors["IDF"][termID]
-            documentsVectors[docID][termID] = TF * IDFi   
+            documentsVectors[docID][termID] = round(TF * IDFi, 4)
     
 # Initializes the document vector to the length of postings. 
 # All indexes initially 0
@@ -178,7 +178,7 @@ def mostSimilar():
     for i in range(len(vect)):
         if vect[i] != 0:
             ranking.append((i, round(vect[i],4)))
-            ranking = sorted(ranking, key=lambda x: x[1])
+            ranking = sorted(ranking, key=lambda x: x[1], reverse=True)
 
     if ranking == []:
         return ("No results produced, please try a different query.")
@@ -260,3 +260,4 @@ def callInvert(filepath):
 # print(search("computer"))
 setup(filepath)
 print(search(""))
+# printVectors()

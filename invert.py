@@ -53,22 +53,22 @@ def generateLists(filepath):
                 pos = tokenize(abstract, docID, pos)
 
             # Publication Date
-            if ".B" == line[:2]:
-                line = fp.readline()
-                date = line[5:]
-                date = date.strip().lower()
-                addtoDict(date)
-                addtoPostings(date, docID, pos)
-                pos += 1
+            # if ".B" == line[:2]:
+            #     line = fp.readline()
+            #     date = line[5:]
+            #     date = date.strip().lower()
+            #     addtoDict(date)
+            #     addtoPostings(date, docID, pos)
+            #     pos += 1
             
-            if ".A" == line[:2]:
-                while (".N" != line[:2]):
-                    line = fp.readline()
-                    author = line
-                    author = author.strip()
-                    addtoDict(author)
-                    addtoPostings(author, docID, pos)
-                    pos += 1
+            # if ".A" == line[:2]:
+            #     while (".N" != line[:2]):
+            #         line = fp.readline()
+            #         author = line
+            #         author = author.strip()
+            #         addtoDict(author)
+            #         addtoPostings(author, docID, pos)
+            #         pos += 1
 
             line = fp.readline()
             cnt += 1

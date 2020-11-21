@@ -25,7 +25,7 @@ def eval():
     compareALL()
 
 # Goes through query.text, one query at a time
-# and saves all queryNum(bers), W (Abstracts), A(uthors), and N into dict(queries)
+# and saves all queryNum(bers), W (Abstracts), A(uthors), and N into dictionary 'queries'
 def getQueries():
     with open(pathQueries, 'r') as fQ:
         line = fQ.readline()
