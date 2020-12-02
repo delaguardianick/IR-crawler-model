@@ -79,7 +79,7 @@ def tokenize(string, docID, pos):
     tokens = string.split()
     for token in tokens:
         token = preProcess(token, useStopWords, useStemming)
-        if token != "" and token != None:
+        if token != "" or token != None:
             pass
             addtoDict(token)
             addtoPostings(token, docID, pos)

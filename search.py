@@ -183,7 +183,7 @@ def mostSimilar():
     if ranking == []:
         return ("No results produced, please try a different query.")
     else:
-        return ranking
+        return ranking[:K]
 
 # Finds similarity of a document vector and the query vector
 # Creates similarity vector where each index 
@@ -258,6 +258,6 @@ def callInvert(filepath):
 
 # interface()
 # print(search("computer"))
-setup(filepath)
-print(search(""))
+# setup(filepath)
+# print(search("Glossary of Computer Engineering and Programming Terminology"))
 # printVectors()
