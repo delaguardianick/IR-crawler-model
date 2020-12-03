@@ -1,6 +1,8 @@
 import time
 import string
 from nltk.stem.porter import PorterStemmer
+import siteClass
+import re
 
 mainDict =  {}
 postings = {}
@@ -8,90 +10,64 @@ useStopWords = False
 useStemming = False
 allIDs = []
 
+
+def test(sites):
+    for site in sites:
+        print(site.title)
+
 # Driver function
-def invert(filepath, stop, stem):
+def invert(sites, stop, stem):
     start_time = time.time()
     global useStopWords
     global useStemming
     useStopWords = stop
     useStemming = stem
-    generateLists(filepath)
-    exportDict(mainDict)
-    exportPostings(postings)
+    generateLists(sites)
+    # exportDict(mainDict)
+    # exportPostings(postings)
+    # print(postings)
     print("Time to generate lists: %.2f seconds" % (time.time() - start_time))
-    return (mainDict, postings)
+    # return (mainDict, postings)
 
 # Get all the relevant lines from the doc and calls tokenize on them
-def generateLists(filepath):
-    with open(filepath, 'r') as fp:
-        line = fp.readline()
-        cnt = 1
-        docID = 0
-        pos = 1
-        while line:
+def generateLists(sites):
+    docID = 0
+    for site in sites:
+        # docID = sites.index(site) #Could be better - O(n)
+        title = site.title
+        # append description to content
+        if site.content != "":
+            content = site.content + site.description 
+        content = site.content
+        url = site.url
+        num_oLinks = str(len(site.oLinks))
 
-            # Index, keeps track of docID
-            if ".I" == line[:2]:
-                docID += 1
-                pos = 1
-                allIDs.append(docID) #used for search.py (finding N for IDF calculation)
-
-            # Title
-            if ".T" == line[:2]:
-                title = fp.readline()
-                # print(title.strip())
-                pos = tokenize(title, docID, pos)
-
-            # Abstract
-            if ".W" == line[:2]:
-                abstract = ""
-                line = fp.readline()
-                while(".B" not in line):
-                    abstract += line.strip() + "\n"
-                    line = fp.readline()
-                # print(abstract)
-                pos = tokenize(abstract, docID, pos)
-
-            # Publication Date
-            # if ".B" == line[:2]:
-            #     line = fp.readline()
-            #     date = line[5:]
-            #     date = date.strip().lower()
-            #     addtoDict(date)
-            #     addtoPostings(date, docID, pos)
-            #     pos += 1
-            
-            # if ".A" == line[:2]:
-            #     while (".N" != line[:2]):
-            #         line = fp.readline()
-            #         author = line
-            #         author = author.strip()
-            #         addtoDict(author)
-            #         addtoPostings(author, docID, pos)
-            #         pos += 1
-
-            line = fp.readline()
-            cnt += 1
+        allIDs.append(docID) #used for search.py (finding N for IDF calculation)
+        tokenize(title, docID)
+        tokenize(content, docID)
+        docID += 1
 
 # Splits lines into tokens, calls preProcess on each token and adds them 
 # to the dictionary and postings list
-def tokenize(string, docID, pos):
+def tokenize(string, docID):
     tokens = string.split()
     for token in tokens:
         token = preProcess(token, useStopWords, useStemming)
         if token != "" or token != None:
             pass
             addtoDict(token)
-            addtoPostings(token, docID, pos)
-            pos += 1
-    return pos
+            addtoPostings(token, docID)
 
 # Cleans the string - removes punctuation, whitespace etc
 # Calls useStemming and stopword functions if True
 def preProcess(token, stop, stem):
-    token = token.lower().strip()
-    table = str.maketrans('', '', string.punctuation)
-    token = token.translate(table)
+    regex = re.compile('\\\w*')
+    if regex.match(token):
+        token = ""
+    else:
+        token = token.lower().strip()
+        table = str.maketrans('', '', string.punctuation)
+        token = token.translate(table)
     
     # if useStopWords is True, call function
     if stop:
@@ -121,18 +97,18 @@ def stemWord(token):
     return stemmed
 
 # Adds the term to the postings list
-def addtoPostings(term, docID, pos):
+def addtoPostings(term, docID):
     if term in postings:              
 
-        # Check if the term has existed in that DocID before. 
+        # Check if the term exists in that DocID . 
         if docID in postings[term][0]: 
-            postings[term][0][docID].append(pos) 
+            # postings[term][0][docID].append(pos) 
 
             # increment termFreq every time term appears in same doc
             postings[term][0][docID][0] = postings[term][0][docID][0] + 1
         else: 
             # add the position to the doc
-            postings[term][0][docID] = [1, pos] 
+            postings[term][0][docID] = [1] 
 
     # If term does not exist in the positional index dictionary  
     # (first encounter). 
@@ -142,7 +118,7 @@ def addtoPostings(term, docID, pos):
         # The postings list is initially empty. 
         postings[term].append({})       
         # Add doc ID, term frequency in doc, and position to the postings list 
-        postings[term][0][docID] = [1, pos] 
+        postings[term][0][docID] = [1] 
 
 # Adds the term to the dictionary with frequency 1, 
 # if already present add 1 to the frequency
@@ -166,10 +142,11 @@ def exportPostings(postings):
     docName = "..\output\postings.txt"
     newDoc = open(docName, "w+")
     for key in sorted(postings):
-        newDoc.write("%s: %s" % (key, postings[key]) + "\n")
+        newDoc.write("{}:{}\n".format(key, postings[key]))
 
 def getNumberOfDocs():
     return int(max(allIDs))
 
 
-# invert('..\cacm.tar\cacm.all', False, False)
+# filepath = '..\cacm.tar\crawlerOutput.txt'
+# invert(filepath, False, False)
