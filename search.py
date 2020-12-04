@@ -6,25 +6,20 @@ from invert import getNumberOfDocs
 
 stop = False
 stem = False
-filepath = '..\cacm.tar\cacm.all'
+# filepath = '..\cacm.tar\cacm.all'
 mainDict = {}
 postings = {}
 documentsVectors = {}
-# N = 0
+N = 0
 K = 5
 
-# Calls invert and generates doc vectors
-# In a module so it doesnt re-generate when search is called.
-def setup(filepath):
-    callInvert(filepath)
-    print("Generating Vectors...")
+def main(post, Q):
+    global postings
+    global N
+    N = getNumberOfDocs()
+    postings = post
     generateDocVectors()
-
-def main(postings):
-    generateDocVectors(postings)
-    printVectors()
-    # print
-    # print(search(""))
+    return search(Q)
 
 
 # Main driver function
@@ -43,47 +38,6 @@ def interface():
     setup(filepath)
     while(True):
         ranking = search("")
-        start_time = time.time()
-        getTitleAndAuthor(ranking)
-        author_time = (time.time() - start_time)
-        print("Time to generate authors and titles: %.2f" % author_time)
-    
-# Only used in interface()
-# Gets the title and author of all docID's in ranking
-def getTitleAndAuthor(ranking):
-    if isinstance(ranking, str):
-        pass
-    else:
-        for tuple in ranking:
-            docID = tuple[0]
-
-            # Open file
-            index = ".I {}".format(docID)
-            f = open(filepath, 'r')
-            line = f.readline()
-            author = ""
-            title = ""
-            while line:
-                # If line contains docID we want
-                if index == line.strip():
-                    line = f.readline() #.T
-                    line = f.readline() # title
-
-                    # append title if multiline
-                    while ((".W" != line[:2]) and (".B" != line[:2])):
-                        title += line
-                        line = f.readline()
-
-                    while (".A" != line[:2]):
-                        line = f.readline()
-
-                    if ".A" == line[:2]:
-                        line = f.readline()
-                        author = line.strip()
-                else:
-                    line = f.readline()
-
-            print("Document ID: {}, \nTitle: {}, \nAuthor: {}\n".format(docID, title.strip(), author))
 
 # Pre-processes string query into list of tokens
 def getQuery(query):
@@ -115,7 +69,7 @@ def generateQueryVector(query):
 
         calcWeights("Q",termID,docIDs, value)
 
-def generateDocVectors(postings):
+def generateDocVectors():
     global N
     terms = sorted(postings.keys()) # Get all terms in postings sorted
     termID = -1  # Counter to track index of term in postings
@@ -129,8 +83,7 @@ def generateDocVectors(postings):
         # IDF
         if "IDF" not in documentsVectors:
             initDocVector("IDF")
-        calcWeights("IDF",termID,docIDs, value)
-
+        calcWeights("IDF",termID,"docIDs", value)
         # For each docID, get the vector of the doc and update 
         # the proper index (termID) with the term frequency in that doc
         for docID in docIDs:
@@ -143,7 +96,6 @@ def generateDocVectors(postings):
 def calcWeights(docID, termID, docIDs, value):
     # IDFi = log(N/dfi)
     if docID == "IDF":
-        # N = invert.getNumberOfDocs() 
         DFi = len(docIDs)
         IDF = math.log10(N / DFi)
         documentsVectors["IDF"][termID] = round(IDF,4)
@@ -168,16 +120,14 @@ def calcWeights(docID, termID, docIDs, value):
 # Initializes the document vector to the length of postings. 
 # All indexes initially 0
 def initDocVector(docID):
-        terms = postings.keys()
-        documentsVectors[docID] = [0] 
-        for i in range(len(terms)-1):
-            documentsVectors[docID].append(0)
-    # print (documentsVectors)
+    terms = postings.keys()
+    documentsVectors[docID] = [0] 
+    for i in range(len(terms)-1):
+        documentsVectors[docID].append(0)
+    # print(documentsVectors)
 
 # Checks sim() of all documents
 def mostSimilar():
-    N = invert.getNumberOfDocs()
-
     for i in range(1, N):
         sim(i,"Q")
     vect = documentsVectors["sim"]
@@ -190,7 +140,7 @@ def mostSimilar():
     if ranking == []:
         return ("No results produced, please try a different query.")
     else:
-        return ranking[:K]
+        return ranking
 
 # Finds similarity of a document vector and the query vector
 # Creates similarity vector where each index 
@@ -223,7 +173,6 @@ def vectorMultiply(vDoc, vQ):
 # generates an index in the vector dictionary for the similarity indexes
 def initSimVector():
     documentsVectors["sim"] = []
-    N = invert.getNumberOfDocs()
     for i in range(N):
         documentsVectors["sim"].append(0)
 
@@ -240,28 +189,6 @@ def vectorLength(vector):
 def printVectors():
     for vector in documentsVectors:
         print ("{} : {}".format(vector, documentsVectors[vector]))
-
-# Calls invert in inverty.py to generate postingsList and Dictionary(unused here)
-# Allows for removal of stop words and stemming
-def callInvert(filepath):
-    global stop
-    global stem
-    global mainDict
-    global postings
-
-    i1 = input("Remove stop words? (y/n) ")
-    if i1 == "y":
-        stop = True
-    elif i1 == "n":
-        stop = False
-
-    i2 = input("Activate stemming? (y/n) ")
-    if i2 == "y":
-        stem = True
-    elif i2 == "n":
-        stem = False
-
-    mainDict, postings = invert.invert(filepath, stop, stem)
 
 def getNumberOfDocs():
     with open("..\output\postings.txt", "r") as fp: 

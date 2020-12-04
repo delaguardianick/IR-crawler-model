@@ -7,6 +7,7 @@ from bs4.element import Comment, Doctype
 import validators
 import siteClass
 import invert
+OUTGOING = 5
 
 http = urllib3.PoolManager()
 
@@ -15,7 +16,9 @@ sites = [seed]
 
 def crawl():
     init_sites()
+    # get_oLinks()
     get_sites_info()
+    print(len(sites))
     return sites
 
 # The inital seed is any page from the dmoz (might be slightly outdated).
@@ -52,7 +55,10 @@ def get_site(url):
 # If page is invalid, content is set to ""
 def get_sites_info():
     content = []
+    i=0
     for site in sites:
+        i += 1
+        print
         soup = get_site(site.url)
         if soup != "":
             # Get outgoing links
@@ -62,6 +68,19 @@ def get_sites_info():
             site.content = ""
         content.append(site.content.strip())
     
+def get_oLinks():
+    # Add to the initial sites
+    for site in sites:
+        soup = get_site(site.url)
+        if soup != "":
+            get_page_links(soup, site)
+            i = 0
+            for url in site.oLinks:
+                if (i < 0):
+                    i += 1
+                    soup = get_site(url)
+                    title = soup.find('title')
+                    sites.append(siteClass.Website(title,"", url))
 
 def get_page_links(soup, site):
     external_urls = set()
@@ -93,7 +112,6 @@ def get_visible_text(soup, site):
     visible_texts = filter(tag_visible, texts)  
     return " ".join(t.strip() for t in visible_texts)
 
-
 # Filter for text visible on a website
 # helper to get_sites_info()
 def tag_visible(element):
@@ -107,4 +125,4 @@ def tag_visible(element):
 # get_sites_info()
 # write_CACM()
 # print(sites[1].function())
-# crawl()
+print(crawl())

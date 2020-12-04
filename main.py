@@ -6,6 +6,7 @@ import search
 maxID = 0
 
 def scrapeSites():
+    global sites
     sites = scraper.crawl()
     with open("sitesDump.txt", "wb") as fp:
         pickle.dump(sites, fp)
@@ -24,13 +25,36 @@ def genPostings():
         pickle.dump(postings, fp)
     fp.close()
 
-def VSM():
+def VSM(q):
     with open("postingsDump.txt", "rb") as fp:   # Unpickling
         postings = pickle.load(fp)
-    search.main(postings)
+    ranking = search.main(postings, q)
     fp.close()
+    return ranking
+
+def returnRanking(ranking):
+    # Get sites again
+    with open("sitesDump.txt", "rb") as fp:   # Unpickling
+        sites = pickle.load(fp)
+    K = 10
+    # print(len(sites[1:]))
+    for rank in ranking[:K]:
+        sitenum = rank[0]
+        site = sites[sitenum]
+        print(site.title)
+        print(site.url)
+
+def main():
+    print("Scraping sites: ...")
+    scrapeSites()
+    print("Generating postings list: ...")
+    genPostings()
+    q = input("Search: ")
+    ranking = VSM(q)
+    returnRanking(ranking)
 
 
 # scrapeSites()
 # genPostings()
-VSM()
+# VSM()
+main()
