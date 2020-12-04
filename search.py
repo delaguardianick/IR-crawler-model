@@ -1,13 +1,10 @@
 import invert
 import math
 import time
-
 from invert import getNumberOfDocs
 
 stop = False
 stem = False
-# filepath = '..\cacm.tar\cacm.all'
-mainDict = {}
 postings = {}
 documentsVectors = {}
 N = 0
@@ -31,13 +28,6 @@ def search(Q):
     ranking = mostSimilar() # finds most relevant doc to query
     print("Time to generate ranking: {}".format(time.time() - genRankingforQ))
     return ranking    
-
-# Alternative to setup and search. Allows for multiple searches.
-# Also returns titles and authors of returned documents
-def interface():
-    setup(filepath)
-    while(True):
-        ranking = search("")
 
 # Pre-processes string query into list of tokens
 def getQuery(query):
@@ -69,6 +59,7 @@ def generateQueryVector(query):
 
         calcWeights("Q",termID,docIDs, value)
 
+# Generates document vectors with size of len(terms)
 def generateDocVectors():
     global N
     terms = sorted(postings.keys()) # Get all terms in postings sorted
@@ -153,6 +144,8 @@ def sim(docID, Q):
         initSimVector()
 
     similarity = vectorMultiply(vDoc, vQ)
+    # print(similarity)
+    # print(docID)
     documentsVectors["sim"][docID] = similarity
 
 # Helper function of sim(docID, Q)
@@ -196,7 +189,5 @@ def getNumberOfDocs():
     return int(numDocs)
          
 # interface()
-# print(search("computer"))
 # setup(filepath)
 # print(search("Glossary of Computer Engineering and Programming Terminology"))
-# printVectors()

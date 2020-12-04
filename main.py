@@ -1,60 +1,74 @@
 import invert
-import siteClass
 import scraper
 import pickle
 import search
 maxID = 0
 
+# Uses pickle module to dump data structure onto a local file
+def p_dump(filepath, file):
+    with open(filepath, "wb") as fp:
+        pickle.dump(file, fp)
+    fp.close()
+
+# Loads data structure previously stored (dumped)
+def p_load(filepath):
+    with open(filepath, "rb") as fp:   # Unpickling
+        file = pickle.load(fp)
+    fp.close()
+    return file
+
+# Calls crawl() in scraper.py to scrape websites into list sites and dumps
 def scrapeSites():
     global sites
     sites = scraper.crawl()
-    with open("sitesDump.txt", "wb") as fp:
-        pickle.dump(sites, fp)
-    fp.close()
+    p_dump("sitesDump.txt",sites)
 
+# Loads sites and calls invert() in invert.py to generate postings lists
+# Dumps generated postings list
 def genPostings():
     global maxID
     # Unpickle sites list containing Website objects
-    with open("sitesDump.txt", "rb") as fp:   # Unpickling
-        sites = pickle.load(fp)
+    sites = p_load("sitesDump.txt")
     postings = invert.invert(sites, True, True)
-    fp.close()
 
     # Pickle postings list
-    with open("postingsDump.txt", "wb") as fp:
-        pickle.dump(postings, fp)
-    fp.close()
+    p_dump("postingsDump.txt", postings)
 
+# Loads postings list and calls main() in search.py
 def VSM(q):
-    with open("postingsDump.txt", "rb") as fp:   # Unpickling
-        postings = pickle.load(fp)
+    postings = p_load("postingsDump.txt")
     ranking = search.main(postings, q)
-    fp.close()
     return ranking
 
+# Loads sites and generates proper info based on VSM ranking
 def returnRanking(ranking):
     # Get sites again
     with open("sitesDump.txt", "rb") as fp:   # Unpickling
         sites = pickle.load(fp)
     K = 10
-    # print(len(sites[1:]))
+    i = 0
     for rank in ranking[:K]:
+        i += 1
+        print("{}.".format(i))
         sitenum = rank[0]
         site = sites[sitenum]
         print(site.title)
         print(site.url)
-
-def main():
+        print(ranking[0])
+        
+# Function to crawl websites and generate postings list
+# Diff function to not have to call all the time
+def setup():
     print("Scraping sites: ...")
     scrapeSites()
     print("Generating postings list: ...")
     genPostings()
-    q = input("Search: ")
-    ranking = VSM(q)
-    returnRanking(ranking)
 
-
-# scrapeSites()
-# genPostings()
-# VSM()
+# Used to search for terms once setup is called at least once
+def main():
+    while (True):
+        q = input("Search: ")
+        ranking = VSM(q)
+        returnRanking(ranking)
+    
 main()

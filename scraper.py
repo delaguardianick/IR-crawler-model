@@ -14,11 +14,11 @@ http = urllib3.PoolManager()
 seed = siteClass.Website("DOMZ - Society:Paranormal", "Former Open Directory Project", "https://dmoz-odp.org/Society/Paranormal/")
 sites = [seed]
 
+# Driver function
+# Scrapes initial sites and returns sites as objects
 def crawl():
     init_sites()
-    # get_oLinks()
     get_sites_info()
-    print(len(sites))
     return sites
 
 # The inital seed is any page from the dmoz (might be slightly outdated).
@@ -56,32 +56,41 @@ def get_site(url):
 def get_sites_info():
     content = []
     i=0
-    for site in sites:
+    initSize = len(sites)
+    for site in sites[:initSize]:
         i += 1
-        print
         soup = get_site(site.url)
         if soup != "":
             # Get outgoing links
-            get_page_links(soup, site)
+            add_oLinks_to_sites(soup, site)
             site.content = get_visible_text(soup, site) 
         else:
             site.content = ""
         content.append(site.content.strip())
-    
-def get_oLinks():
-    # Add to the initial sites
-    for site in sites:
-        soup = get_site(site.url)
-        if soup != "":
-            get_page_links(soup, site)
-            i = 0
-            for url in site.oLinks:
-                if (i < 0):
-                    i += 1
-                    soup = get_site(url)
-                    title = soup.find('title')
-                    sites.append(siteClass.Website(title,"", url))
 
+    # for site in sites[initSize:]:
+    #     soup = get_site(site.url)
+    #     if soup != "":
+    #         site.content = get_visible_text(soup, site) 
+    #     else:
+    #         site.content = ""
+    
+# Gets links in a page
+def add_oLinks_to_sites(soup, site):
+    # Add to the initial sites
+    get_page_links(soup, site)
+    # print(list(site.oLinks)[:1])
+    # for url in list(site.oLinks)[:1]:
+    #     print("Added:")
+    #     soup = get_site(url)
+    #     if soup != "":
+    #         title = soup.find('title')
+    #         if title != None:
+    #             title = title.get_text().strip()
+    #             # print("append {} to sites {}".format(title, url))
+    #             sites.append(siteClass.Website(title,"", url))
+
+# BS4 to scrape all anchor tags of a site and store in set
 def get_page_links(soup, site):
     external_urls = set()
     domain_name = urlparse(site.url).netloc
@@ -97,9 +106,9 @@ def get_page_links(soup, site):
             continue 
     
     site.oLinks = external_urls
-    # print(domain_name.split("."))
-    # print(site.oLinks)
 
+# Validates URL is valid
+# (To not count invalid links for as external urls)
 def validateURL(url):
     valid = validators.url(url)
     if valid:
@@ -107,6 +116,7 @@ def validateURL(url):
     else: 
         return False
 
+# Gets all visible_text in a page using bs4
 def get_visible_text(soup, site):
     texts = soup.findAll(text=True)
     visible_texts = filter(tag_visible, texts)  
@@ -121,8 +131,4 @@ def tag_visible(element):
         return False
     return True
 
-# init_sites()
-# get_sites_info()
-# write_CACM()
-# print(sites[1].function())
-print(crawl())
+# crawl()

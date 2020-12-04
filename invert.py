@@ -2,7 +2,6 @@ from sys import maxunicode
 import time
 import string
 from nltk.stem.porter import PorterStemmer
-import siteClass
 import re
 
 mainDict =  {}
@@ -11,10 +10,6 @@ useStopWords = False
 useStemming = False
 allIDs = []
 
-
-def test(sites):
-    for site in sites:
-        print(site.title)
 
 # Driver function
 def invert(sites, stop, stem):
@@ -33,9 +28,9 @@ def invert(sites, stop, stem):
 
 # Get all the relevant lines from the doc and calls tokenize on them
 def generateLists(sites):
-    docID = 0
+    # docID = 0
     for site in sites:
-        # docID = sites.index(site) #Could be better - O(n)
+        docID = sites.index(site) #Could be better - O(n)
         title = site.title
         # append description to content
         if site.content != "":
@@ -47,7 +42,7 @@ def generateLists(sites):
         allIDs.append(docID) #used for search.py (finding N for IDF calculation)
         tokenize(title, docID)
         tokenize(content, docID)
-        docID += 1
+        # docID += 1
 
 # Splits lines into tokens, calls preProcess on each token and adds them 
 # to the dictionary and postings list
