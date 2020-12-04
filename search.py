@@ -2,6 +2,8 @@ import invert
 import math
 import time
 
+from invert import getNumberOfDocs
+
 stop = False
 stem = False
 filepath = '..\cacm.tar\cacm.all'
@@ -17,6 +19,13 @@ def setup(filepath):
     callInvert(filepath)
     print("Generating Vectors...")
     generateDocVectors()
+
+def main(postings):
+    generateDocVectors(postings)
+    printVectors()
+    # print
+    # print(search(""))
+
 
 # Main driver function
 # Produces ranking for input Q
@@ -106,13 +115,11 @@ def generateQueryVector(query):
 
         calcWeights("Q",termID,docIDs, value)
 
-def generateDocVectors():
+def generateDocVectors(postings):
     global N
-    N = invert.getNumberOfDocs() 
     terms = sorted(postings.keys()) # Get all terms in postings sorted
     termID = -1  # Counter to track index of term in postings
-    N = invert.getNumberOfDocs() #Size of postings array - used for IDF
-
+    N = getNumberOfDocs() #Size of postings array - used for IDF
     # for each term in postings
     for term in terms:
         termID += 1
@@ -121,7 +128,7 @@ def generateDocVectors():
 
         # IDF
         if "IDF" not in documentsVectors:
-                initDocVector("IDF")
+            initDocVector("IDF")
         calcWeights("IDF",termID,docIDs, value)
 
         # For each docID, get the vector of the doc and update 
@@ -256,6 +263,11 @@ def callInvert(filepath):
 
     mainDict, postings = invert.invert(filepath, stop, stem)
 
+def getNumberOfDocs():
+    with open("..\output\postings.txt", "r") as fp: 
+        numDocs = fp.readline()
+    return int(numDocs)
+         
 # interface()
 # print(search("computer"))
 # setup(filepath)

@@ -1,3 +1,4 @@
+from sys import maxunicode
 import time
 import string
 from nltk.stem.porter import PorterStemmer
@@ -24,10 +25,11 @@ def invert(sites, stop, stem):
     useStemming = stem
     generateLists(sites)
     # exportDict(mainDict)
-    # exportPostings(postings)
+    exportPostings(postings)
     # print(postings)
     print("Time to generate lists: %.2f seconds" % (time.time() - start_time))
-    # return (mainDict, postings)
+    maxID = getNumberOfDocs()
+    return (postings)
 
 # Get all the relevant lines from the doc and calls tokenize on them
 def generateLists(sites):
@@ -141,8 +143,13 @@ def exportDict(mainDict):
 def exportPostings(postings):
     docName = "..\output\postings.txt"
     newDoc = open(docName, "w+")
+    regex = re.compile('\\\w*')
+    newDoc.write(str(getNumberOfDocs()) + "\n")
     for key in sorted(postings):
-        newDoc.write("{}:{}\n".format(key, postings[key]))
+        try:
+            newDoc.write("{}:{}\n".format(key, postings[key]))
+        except Exception as e:
+            pass
 
 def getNumberOfDocs():
     return int(max(allIDs))
