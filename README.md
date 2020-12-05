@@ -10,7 +10,7 @@
 	- Gets all the relevant links on seed
 		- Extracts content (all visible text -content- and valid url anchor tags -oLinks) from these links 
 	- Returns list of objects with all websites (sites)
-ex. sites = [obj(site1), obj(site2),...]
+	ex. sites = [obj(site1), obj(site2),...]
 
 - SiteClass.py is the Website class.
 	- SiteClass.Website(title= , description=, url=, content=, oLinks=set())
