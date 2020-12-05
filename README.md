@@ -1,36 +1,35 @@
-# CPS842-assignment2
+# CPS842-project
 
-- Invert.py generates postingList and dictionary (not used for assignment 2)
+- Invert.py generates postings list (not used for assignment 2) (Assignment 1)
+	- Returns postings
 
-- Search.py implements the vector space model for finding similarity between the documents and the query
-	- It takes about 47 seconds to generate an ordered list of relevant documents for each query
-		- That time is mostly allocated to the calculation of similarity between all the documents vectors and the query vector
-			 - Can be optimized further but unsure how to and don't have the time.
+- Search.py implements the vector space model for finding similarity between the documents and the query (Assignment 2)
+	- Returns ranking
+
+- Scraper.py has a seed (initial website to be scraped) - Current seed set to: DOMZ - Society:Paranormal "https://dmoz-odp.org/Society/Paranormal/"
+	- Gets all the relevant links on seed
+		- Extracts content (all visible text -content- and valid url anchor tags -oLinks) from these links 
+	- Returns list of objects with all websites (sites)
+ex. sites = [obj(site1), obj(site2),...]
+
+- SiteClass.py is the Website class.
+	- SiteClass.Website(title= , description=, url=, content=, oLinks=set())
 	
-How to run:
-	- If you only want to search 1 query in the collection, or want to use search externally:
-		- run: 
-		setup()
-		search("") to ask for a query through the command line
-		or
-		setup()
-		search("Query we want to search for")
-		
-		- Returns the list of ALL relevant results to the query according to the IR
-
-	-Else if we want an interface, simply run interface()
-		- This will also print the top-K documents along with the titles and authors
-
-- Eval.py evaluates the results of search.py
-	- Goes through query.text. For each query, search it up - returning a ranking list
-	- Compare that ranking list with the ranking (for the same query) in q rels
-	- Return MAP and average R-precision
-	
-	- Since each individual query takes about 47 seconds to run (due to the dot product mostly)
-		- And query.text has 64 queries..
-		- eval takes about 50 minutes to finish executing.
+- Main.py main() is the driver function
+	- Calls all previous modules and gets necessary info
+	- Main -> Scraper -> Invert -> Search -> Main
+	- Uses library Pickle() to store filled data structures in local (p_load, p_dump)
+		- Used to avoid calling Scraper and Invert all the time
 
 How to run:
-	eval()
+- in main.py run setup() at least once.
+- Then run main() and input the keyword to be searched.
+	- Will return a ranking of most relevant results according to the VSM
+
+PS:
+- We haven't been able to completely finish this assignment due to a heavy courseload and personal problems.
+These are the features still to be done:
+- Implement a web interface (don't think its too hard to link these python files to a website with Flask)
+- Implement PageRank (even though all outgoing links are collected for every page, we simply do not have time)
 
 	

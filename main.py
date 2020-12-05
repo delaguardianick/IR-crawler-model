@@ -66,6 +66,7 @@ def setup():
 
 # Used to search for terms once setup is called at least once
 def main():
+    # setup()
     while (True):
         q = input("Search: ")
         ranking = VSM(q)
