@@ -1,5 +1,9 @@
 # CPS842-Assignment2
 
+The purpose of this assignment was help us have a better understanding on the vector space retrieval model, gain some experiences of building a complete information retrieval system, and understand the process of evaluating an IR system based on some standard test collections
+
+Uses modified versions of Assignment 1
+
 - Invert.py generates postings list (not used for assignment 2) (Assignment 1)
 	- Returns postings
 
@@ -26,9 +30,7 @@ How to run:
 - Then run main() and input the keyword to be searched.
 	- Will return a ranking of most relevant results according to the VSM
 
-PS:
-- We haven't been able to completely finish this assignment due to a heavy courseload and personal problems.
 These are the features still to be done:
 - Implement a web interface (don't think its too hard to link these python files to a website with Flask)
-- Implement PageRank (even though all outgoing links are collected for every page, we simply do not have time)
+- Implement PageRank (even though all outgoing links are collected for every page)
 
