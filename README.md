@@ -1,4 +1,4 @@
-# IR model - Search engine
+# IR crawler model
 
 CPS842-Assignment2
 
