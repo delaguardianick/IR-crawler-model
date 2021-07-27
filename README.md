@@ -2,7 +2,7 @@
 
 CPS842-Assignment2
 
-The purpose of this project was help me have a better understanding of the vector space retrieval model, gain some experiences of building a complete information retrieval system, and understand the process of evaluating an IR system based on some standard test collections.
+The purpose of this project was to get a better understanding of the vector space retrieval model, gain some experiences of building a complete information retrieval system, and understand the process of evaluating an IR system based on some standard test collections.
 
 Uses modified versions of Assignment 1
 
