@@ -24,7 +24,7 @@ Uses modified versions of Assignment 1
 - Main.py main() is the driver function
 	- Calls all previous modules and gets necessary info
 	- Main -> Scraper -> Invert -> Search -> Main
-	- Uses library Pickle() to store filled data structures in local (p_load, p_dump)
+	- Uses library Pickle to store filled data structures in local (p_load, p_dump)
 		- Used to avoid calling Scraper and Invert all the time
 
 How to run:
